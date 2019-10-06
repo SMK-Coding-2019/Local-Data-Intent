@@ -6,6 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.Observer
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,9 +23,15 @@ class MainActivity : AppCompatActivity() {
 
     val genders = listOf("Laki-laki", "Perempuan")
 
+    var appDatabase : AppDatabase? = null
+    var siswaDAO : SiswaDAO? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        appDatabase = AppDatabase.getAppDatabase(this)
+        siswaDAO = appDatabase?.SiswaDAO()
 
         nama = findViewById(R.id.et_name)
         spinnerGender = findViewById(R.id.sp_gender)
@@ -49,17 +59,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         submitButton.setOnClickListener {
-            val intent : Intent = Intent()
+            // TODO : ini dikomen
+//            val intent : Intent = Intent()
 
-            val siswaYangAkanDikirim : Siswa =
-                Siswa(nama.text.toString(),
-                    genders[spinnerIndex], alamat.text.toString(),
-                    email.text.toString())
+            GlobalScope.launch {
+                val siswaYangAkanDisimpan  =
+                    Siswa(nama = nama.text.toString(),
+                        gender = genders[spinnerIndex], alamat = alamat.text.toString(),
+                        email = email.text.toString())
 
-            intent.putExtra("siswa", siswaYangAkanDikirim)
+                siswaDAO?.tambahSiswa(siswaYangAkanDisimpan)
+                finish()
+            }
 
-            setResult( 13, intent)
-            finish()
+            // TODO : ini dikomen
+//            intent.putExtra("siswa", siswaYangAkanDikirim)
+
+            // TODO : ini dikomen
+//            setResult( 13, intent)
         }
     }
 }

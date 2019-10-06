@@ -1,10 +1,7 @@
 package com.ampersanda.datasiswa
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface SiswaDAO {
@@ -14,4 +11,7 @@ interface SiswaDAO {
 
     @Query("SELECT * FROM Siswa")
     fun ambilSemuaDataSiswa() : LiveData<List<Siswa>>
+
+    @Delete
+    fun hapusSiswa(siswa: Siswa)
 }

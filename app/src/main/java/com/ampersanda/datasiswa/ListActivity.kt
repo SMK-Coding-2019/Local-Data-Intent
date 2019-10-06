@@ -3,6 +3,7 @@ package com.ampersanda.datasiswa
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 import kotlinx.android.synthetic.main.activity_list.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ListActivity : AppCompatActivity() {
 
@@ -29,20 +32,13 @@ class ListActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler_view)
 
-        recyclerView.layoutManager = LinearLayoutManager(
-            this,
-            LinearLayoutManager.VERTICAL, false
-        )
-
-        adapter = RecyclerAdapter(this, recyclerViewList)
-
-        recyclerView.adapter = adapter
+        updateData(listOf())
 
         // TODO : init database
         appDatabase = AppDatabase.getAppDatabase(this)
         siswaDAO = appDatabase?.SiswaDAO()
 
-        onResume()
+        ambilSiswa()
 
         fab.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -53,8 +49,7 @@ class ListActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    fun ambilSiswa() {
         siswaDAO?.ambilSemuaDataSiswa()?.observe(this, Observer {
             if (it.isEmpty()) {
                 Toast.makeText(this, "Belum punya siswa", Toast.LENGTH_SHORT).show()
@@ -64,12 +59,17 @@ class ListActivity : AppCompatActivity() {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        ambilSiswa()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         AppDatabase.hapusDatabase()
     }
 
-    fun updateData(siswaSiswaBaru : List<Siswa>) {
+    fun updateData(siswaSiswaBaru: List<Siswa>) {
         recyclerViewList = siswaSiswaBaru
 
         recyclerView.layoutManager = LinearLayoutManager(
@@ -77,7 +77,16 @@ class ListActivity : AppCompatActivity() {
             LinearLayoutManager.VERTICAL, false
         )
 
-        adapter = RecyclerAdapter(this, recyclerViewList)
+        adapter = RecyclerAdapter(this, recyclerViewList, object : RecyclerAdapter.OnDelete {
+            override fun onClick(siswa: Siswa) {
+                GlobalScope.launch {
+                    siswaDAO?.hapusSiswa(siswa)
+                }
+
+                ambilSiswa()
+            }
+
+        })
 
         recyclerView.adapter = adapter
     }

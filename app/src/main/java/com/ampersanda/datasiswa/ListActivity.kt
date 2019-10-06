@@ -42,13 +42,7 @@ class ListActivity : AppCompatActivity() {
         appDatabase = AppDatabase.getAppDatabase(this)
         siswaDAO = appDatabase?.SiswaDAO()
 
-        siswaDAO?.ambilSemuaDataSiswa()?.observe(this, Observer {
-            if (it.isEmpty()) {
-                Toast.makeText(this, "Belum punya siswa", Toast.LENGTH_SHORT).show()
-            }
-
-            updateData(it)
-        })
+        onResume()
 
         fab.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -61,9 +55,6 @@ class ListActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        appDatabase = AppDatabase.getAppDatabase(this)
-        siswaDAO = appDatabase?.SiswaDAO()
-
         siswaDAO?.ambilSemuaDataSiswa()?.observe(this, Observer {
             if (it.isEmpty()) {
                 Toast.makeText(this, "Belum punya siswa", Toast.LENGTH_SHORT).show()
